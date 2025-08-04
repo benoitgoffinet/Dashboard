@@ -8,4 +8,3 @@ tensorflow
 gunicorn
 matplotlib
 transformers
-tf-keras
