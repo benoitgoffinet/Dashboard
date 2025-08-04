@@ -1,0 +1,10 @@
+scikit-learn
+dash
+plotly
+pandas
+numpy
+Pillow
+tensorflow
+gunicorn
+matplotlib
+transformers
