@@ -367,6 +367,7 @@ graph_container_style = {
 
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = app.server  
 app.title = "Dashboard de classification de races de chiens"
 
 #  layout doit être défini avant de démarrer l'app
