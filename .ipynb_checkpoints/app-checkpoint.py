@@ -24,6 +24,7 @@ import base64
 import logging
 import sys
 import io
+import plotly.graph_objects as go
 from keras.models import load_model
 
 
@@ -44,6 +45,18 @@ label_string_col = "labels"
 # Charge labels humains triés par encodage (pour affichage)
 label_map = df_test[[encoded_col, label_string_col]].drop_duplicates().sort_values(by=encoded_col)
 class_names = label_map[label_string_col].to_list()
+label_map = {
+    0: 'Welsh_springer_spaniel',
+    1: 'dhole',
+    2: 'Doberman',
+    3: 'Border_collie',
+    4: 'malinois',
+    5: 'groenendael',
+    6: 'Eskimo_dog',
+    7: 'kuvasz',
+    8: 'golden_retriever',
+    9: 'Irish_water_spaniel'
+}
 
 # Charge images .npy et normalise
 
@@ -115,8 +128,10 @@ test_accuracy = {
 
 app = dash.Dash(__name__)
 
-def create_confusion_heatmap(cm, classes):
-    z = cm.tolist() 
+
+def create_confusion_heatmap(cm, label_map):
+    classes = [label_map[i] for i in range(len(label_map))]
+    z = cm.tolist()
     x = classes
     y = classes
 
@@ -129,8 +144,8 @@ def create_confusion_heatmap(cm, classes):
         hovertemplate='Prédit: %{x}<br>Réel: %{y}<br>Valeur: %{z}<extra></extra>'
     )
 
-    # Création des annotations (valeurs numériques dans chaque cellule)
     annotations = []
+    max_val = max(map(max, z))
     for i in range(len(z)):
         for j in range(len(z[i])):
             annotations.append(
@@ -139,20 +154,29 @@ def create_confusion_heatmap(cm, classes):
                     y=y[i],
                     text=str(z[i][j]),
                     showarrow=False,
-                    font=dict(color='black' if z[i][j] < max(map(max, z))/2 else 'white')
+                    font=dict(color='black' if z[i][j] < max_val / 2 else 'white')
                 )
             )
 
     layout = go.Layout(
         title=dict(
-          text="Matrice de confusion",
-          x=0.5,           # centre horizontalement (0 = gauche, 1 = droite)
-          xanchor='center' # ancre au centre du titre
+            text="Matrice de confusion",
+            x=0.5,
+            xanchor='center',
+            font=dict(size=18)
         ),
-        xaxis=dict(title="Prédiction"),
-        yaxis=dict(title="Vérité Terrain"),
+        xaxis=dict(
+            title="Prédiction",
+            tickangle=45,            # Rotation des labels à 45°
+            tickfont=dict(size=12),  # Taille police labels
+            automargin=True          # Ajuste automatiquement la marge pour les ticks
+        ),
+        yaxis=dict(
+            title="Vérité Terrain",
+            tickfont=dict(size=12)
+        ),
+        margin=dict(b=150),  # Marge en bas pour éviter la coupure des labels x
         annotations=annotations
-        
     )
 
     fig = go.Figure(data=[heatmap], layout=layout)
